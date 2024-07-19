@@ -1,0 +1,24 @@
+/* @theme custom-theme */
+@import "default";
+
+section {
+  padding-top: 0;
+  text-align: start;
+  background-color: #333333;
+}
+
+section h1 {
+  font-size: 1.1rem;
+  text-align: start;
+  color: cornflowerblue;
+}
+
+section h2 {
+  font-size: 1rem;
+  text-align: start;
+  color: darkcyan;
+}
+
+section p {
+  text-align: start;
+}

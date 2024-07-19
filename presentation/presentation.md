@@ -1,18 +1,9 @@
 ---
 marp: true
-theme: uncover
+theme: custom-theme
 class: invert
 paginate: true
 ---
-
-<!-- <style>
-  :root {
-    --color-foreground: #fff;
-    --color-highlight: #f96;
-    --color-dimmed: #888;
-    --
-  }
-</style> -->
 
 # Pulumi
 
@@ -37,7 +28,7 @@ https://www.pulumi.com/
 
 # Concepts
 
-**2. Multiple vendors**
+## 2. Multiple vendors
 
 - AWS
 - Azure
@@ -162,6 +153,23 @@ pulumi stack output bucketName
 - Deploy the same `index.html` to 3 different buckets in a loop using your chosen programming languages abilities
 
 ---
+
+# Task3
+
+Setting parameters and secrets for a stack.
+
+```
+pulumi config set --stack <yourStackName> dbUsername admin
+pulumi config set --stack <yourStackName> --secret dbPassword S3cr37
+pulumi config --stack <yourStackName>
+```
+
+Output:
+
+```
+dbUsername       admin
+dbPassword   [secret]
+```
 
 # Destroy your stack
 
