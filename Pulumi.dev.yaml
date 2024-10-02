@@ -1,1 +1,5 @@
-encryptionsalt: v1:UhElfVCJsuY=:v1:3O3LayHUzSaS51d5:cANQ1nI8oRzRuj+o+2q972yspFdDCg==
+encryptionsalt: v1:QjMO2N3bfH0=:v1:qjSbq2kO3+gYLN5I:vG6f81XdCN8x8zMfdNusnz7lC44w8A==
+config:
+  quickstart:dbPassword:
+    secure: v1:3+PgOfSr1yJ95aOY:MyRcT7j2YccWbBCQM9dHaWbqgL5hVgaC5K3ixQjKDEI=
+  quickstart:dbUsername: your-db-username
