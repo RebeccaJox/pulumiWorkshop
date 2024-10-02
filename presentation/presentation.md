@@ -74,6 +74,12 @@ const example = new aws.rds.Instance("example", {
   username: "someone",
   password: password.result, // We pass the output from password as an input
 });
+
+export const databaseArn = example.arn; // export an output to the config file
+```
+
+```bash
+pulumi stack output password --show-secrets
 ```
 
 ---
@@ -87,11 +93,46 @@ const example = new aws.rds.Instance("example", {
 
 ---
 
-## Secrets
+## Plain Text and Secrets
 
-- Store secrets encrypted and check them into git
+- Store plain text parameters or encrypted secrets and check them into git
 - manage keys with different vendors eg. AWS Key Management Service (KMS)
-<!-- - TODO -->
+
+Setting from CLI:
+
+```bash
+pulumi config set name userName # set a plain-text value
+pulumi config set --secret dbPassword S3cr37 # set an encrypted secret value
+```
+
+Usage in code:
+
+```typescript
+import * as pulumi from "@pulumi/pulumi";
+
+const config = new pulumi.Config();
+const dbPassword = config.require("userName");
+const dbPassword = config.requireSecret("dbPassword");
+```
+
+---
+
+## Managed Secrets or passphrase
+
+To set a method for secrets encryption for the current stack:
+
+```bash
+pulumi stack change-secrets-provider "<secrets-provider>"
+```
+
+Possible values: default, passphrase, awskms, azurekeyvault, gcpkms,hashivault
+
+example:
+
+```bash
+pulumi stack change-secrets-provider \
+awskms:///arn:aws:kms:us-east-1:111122223333:key/1234abcd-12ab-34bc-56ef-1234567890ab
+```
 
 ---
 
