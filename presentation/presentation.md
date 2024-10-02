@@ -7,15 +7,17 @@ paginate: true
 
 # Pulumi
 
-![height:400px bg right](./pulumi_animal.png)
 Infrastructure as Code (IaC)
 https://www.pulumi.com/
+![bg right width:500 height:500](./pulumi-logo.svg)
 
 ---
 
 # Concepts
 
-**1. Use same language for Infrastructure as for Code**
+---
+
+## Use same language for Infrastructure as for Code application code
 
 - Javascript/Typescript
 - Python
@@ -26,22 +28,19 @@ https://www.pulumi.com/
 
 ---
 
-# Concepts
-
-## 2. Multiple vendors
+## Multiple vendors
 
 - AWS
 - Azure
 - Google
 - Kubernetes
+- ... and over 100 more
 
 ---
 
 ![height:500px bg right](./structure.png)
 
-# Concepts
-
-**3. Structure**
+## Structure
 
 - Projects
 - Stacks
@@ -49,69 +48,94 @@ https://www.pulumi.com/
 
 ---
 
-# Concepts
+## Inputs and Outputs
 
-**4. Inputs and Outputs**
-
-- Inputs describe what the resources do
+- Inputs describe the resources and what they shall do
 - Outputs return infos of created resources (like a promise)
+- The dependency of outputs gives the order of resource creation
 
 ---
 
-# Concepts
+## Inputs and Outputs example
 
-**5. Configuration**
+```typescript
+// password is an output
+const password = new random.RandomPassword("password", {
+  length: 16, // this is an Input
+  special: true, // ...and this
+  overrideSpecial: "!#$%&*()-_=+[]{}<>:?", // ...and this
+});
+
+// the database implicitly depends on the output of password
+const example = new aws.rds.Instance("example", {
+  instanceClass: "db.t3.micro",
+  allocatedStorage: 64,
+  engine: "mysql",
+  username: "someone",
+  password: password.result, // We pass the output from password as an input
+});
+```
+
+---
+
+## Configuration
 
 - Store different Configs for different stages
 - Pulumi.<stack-name>.yaml (Pulumi.dev.yaml)
-- checking with git
+- structure similar to `application.properties` in Spring
+- checking in with git
 
 ---
 
-# Concepts
-
-**6. Secrets**
+## Secrets
 
 - Store secrets encrypted and check them into git
+- manage keys with different vendors eg. AWS Key Management Service (KMS)
 <!-- - TODO -->
 
 ---
 
-# HandsOn
+# Hands On
+
+---
+
+## Example
 
 - AWS
 - Typescript
 - Minimal deployment
 
----
-
-# HandsOn Prerequisites
+## Prerequisites
 
 - Node and npm installed
 - docker installed
+- AWS configured
+
+... but you are free to use any other supported language
 
 ---
 
-# AWS Setup
+## AWS Setup
 
-- Install AWS CLI
+- Install AWS CLI from https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 - AWS Account:
-  - Security Credentials > Create Access Key > Command Line Interface (CLI)
+  - Security Credentials > Create Access Key > Command Line Interface (CLI) > Save your credentials
 - `aws configure`
   Note: Please double check that you are logged in to your codecentric account not to any customers account. If you have issues logging in, try deleting the ~/.aws/credentials file and execute `aws configure` again
 
 ---
 
-# Pulumi Setup
+## Pulumi Setup
 
 - install pulumi from this page https://www.pulumi.com/docs/install/
 - check installation with `pulumi version`
 - Local Setup (you can also use Pulumi Cloud)
-- `pulumi login file://~/Downloads/Pulumi_test`
+- `pulumi login file://~/path/to/pulumi/state`
+- creates a `.pulumi` folder which should _not_ be checked into git
 
 ---
 
-# Choose your Language
+## Choose your Language
 
 ```bash
 mkdir quickstart
@@ -121,7 +145,7 @@ pulumi new aws-typescript
 
 ---
 
-# Deploy your Setup
+## Deploy your Setup
 
 - creates an S3-Bucket
 
@@ -141,20 +165,20 @@ pulumi stack output bucketName
 
 ---
 
-# Task1
+## Task1
 
 - Deploy the `index.html` as a static website to AWS. Use an S3 Bucket here.
-  (Tipp: just go through the Pulumi Get Started Guide if you have no ideas https://bucketa-57c106b.s3.eu-central-1.amazonaws.com/bucketA-index.html)
+  (Tipp: just go through the Pulumi _Get Started Guide_ if you have no idea how to start https://bucketa-57c106b.s3.eu-central-1.amazonaws.com/bucketA-index.html)
 
 ---
 
-# Task2
+## Task2
 
 - Deploy the same `index.html` to 3 different buckets in a loop using your chosen programming languages abilities
 
 ---
 
-# Task3
+## Task3
 
 Setting parameters and secrets for a stack.
 
@@ -171,7 +195,7 @@ dbUsername       admin
 dbPassword   [secret]
 ```
 
-# Destroy your stack
+## Destroy your stack
 
 ```bash
 pulumi destroy
@@ -179,27 +203,27 @@ pulumi destroy
 
 ---
 
-# Don't know how to start?
+## Don't know how to start?
 
 https://www.pulumi.com/ai
 
 ---
 
-# Why not just use Terraform?
+## Why not just use Terraform?
 
 - Terraform is not strict OpenSource anymore
 - I don't like YAML!
 
 ---
 
-# Pulumi Advantages (opinionated)
+## Pulumi Advantages (opinionated)
 
 - Integrated into your setup (linter, formatting, testing etc.)
 - Infrastructure code can be tested like any other code
 
 ---
 
-# Pulumi Drawbacks (opinionated)
+## Pulumi Drawbacks (opinionated)
 
 - You have more freedom in writing Code (and more opportunities to write crap)
 - Usage of Pulumi Cloud is default
