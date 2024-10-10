@@ -239,15 +239,24 @@ pulumi stack output bucketName
 
 ## Task3
 
+Copy the content of `tasks/task3.ts` to `pulumiWorkshop/index.ts`
+
+Unit testing:
+
+1. Take a look at the `index.test.ts` file
+2. Run `npm run test` from the project root
+3. Fix the errors
+
 Testing: Property and Policy Testing:
 
 1. Create a new folder in your project root called `policy`
 2. `cd policy`
 3. `pulumi policy new aws-typescript`
 4. Copy the content of `tasks/task3-policies.ts` into `pulumiWorkshop/policy/index.ts`
-5. Copy the content of `tasks/task3.ts` to `pulumiWorkshop/index.ts`
-6. In the root of your project run `pulumi preview --policy-pack ./policy`
-7. Review the issues and improve.
+5. In the root of your project run `pulumi preview --policy-pack ./policy`
+6. Review the issues and improve.
+
+After fixing the tests: run `pulumi up` again and have a look on the outputs. What do you see?
 
 ## Destroy your stack
 
@@ -299,4 +308,5 @@ https://www.pulumi.com/ai
 ## Pulumi Drawbacks (opinionated)
 
 - You have more freedom in writing Code (and more opportunities to write crap)
-- Usage of Pulumi Cloud is default
+- Usage of Pulumi Cloud is default, self managing can cause issues with drifting states
+- Unit and Policy testing seem very close and exporting the resources automatically makes them outputs

@@ -24,7 +24,7 @@ const registryInfo = repository.registryId.apply(async (id) => {
   };
 });
 
-const image = new docker.Image("pulumi-image", {
+export const image = new docker.Image("pulumi-image", {
   build: {
     context: "app",
     platform: "linux/amd64",
@@ -59,12 +59,15 @@ const lambda = new aws.lambda.Function("my-lambda", {
   architectures: ["x86_64"],
 });
 
-const lambdaPermission = new aws.lambda.Permission("pulumi-lambda-permission", {
-  action: "lambda:InvokeFunction",
-  statementId: "AllowAPIGatewayInvoke",
-  function: lambda,
-  principal: "apigateway.amazonaws.com",
-});
+export const lambdaPermission = new aws.lambda.Permission(
+  "pulumi-lambda-permission",
+  {
+    action: "lambda:InvokeFunction",
+    statementId: "AllowAPIGatewayInvoke",
+    function: lambda,
+    principal: "apigateway.amazonaws.com",
+  }
+);
 
 const apiGatewayRestApi = new aws.apigateway.RestApi("pulumi-api", {
   name: "my-first-pulumi-api",
