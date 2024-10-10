@@ -3,7 +3,7 @@ import * as docker from "@pulumi/docker";
 import * as pulumi from "@pulumi/pulumi";
 
 const repository = new aws.ecr.Repository("pulumi-repository", {
-  // name: "my-first-pulumi-lambda",
+  name: "my-first-pulumi-lambda",
   forceDelete: true,
 });
 
@@ -36,8 +36,6 @@ const image = new docker.Image("pulumi-image", {
 export const repoDigest = image.repoDigest;
 
 const lambda = new aws.lambda.Function("my-lambda", {
-  name: "pulumi-lambda", // enforced by policy
-  description: "Pulls dad jokes", // enforced by policy
   imageUri: image.repoDigest,
   packageType: "Image",
   role: new aws.iam.Role("pulumi-lambda-role", {

@@ -239,6 +239,26 @@ pulumi stack output bucketName
 
 ## Task3
 
+Testing: Property and Policy Testing:
+
+1. Create a new folder in your project root called `policy`
+2. `cd policy`
+3. `pulumi policy new aws-typescript`
+4. Copy the content of `tasks/task3-policies.ts` into `pulumiWorkshop/policy/index.ts`
+5. Copy the content of `tasks/task3.ts` to `pulumiWorkshop/index.ts`
+6. In the root of your project run `pulumi preview --policy-pack ./policy`
+7. Review the issues and improve.
+
+## Destroy your stack
+
+```bash
+pulumi destroy
+```
+
+---
+
+## Task4
+
 Setting parameters and secrets for a stack.
 
 ```
@@ -253,18 +273,6 @@ Output:
 dbUsername       admin
 dbPassword   [secret]
 ```
-
-## Destroy your stack
-
-```bash
-pulumi destroy
-```
-
----
-
-## Task4
-
-Write a test for your infrastructure. // TODO
 
 ---
 
