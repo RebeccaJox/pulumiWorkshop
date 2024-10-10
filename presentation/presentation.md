@@ -44,7 +44,25 @@ https://www.pulumi.com/
 
 - Projects
 - Stacks
+  - dev, qa, prod ...
 - Resources
+  - vm, container, database ...
+
+---
+
+## Stacks
+
+Each stack has an own configuration which can be initialized via
+
+```bash
+pulumi stack init staging
+```
+
+To initialize a stack with the config from another stack use:
+
+```bash
+pulumi stack init staging --copy-config-from dev
+```
 
 ---
 
@@ -67,7 +85,7 @@ const password = new random.RandomPassword("password", {
 });
 
 // the database implicitly depends on the output of password
-const example = new aws.rds.Instance("example", {
+const database = new aws.rds.Instance("database", {
   instanceClass: "db.t3.micro",
   allocatedStorage: 64,
   engine: "mysql",
@@ -75,7 +93,7 @@ const example = new aws.rds.Instance("example", {
   password: password.result, // We pass the output from password as an input
 });
 
-export const databaseArn = example.arn; // export an output to the config file
+export const databaseArn = database.arn; // export an output to the config file
 ```
 
 ```bash
@@ -241,6 +259,12 @@ dbPassword   [secret]
 ```bash
 pulumi destroy
 ```
+
+---
+
+## Task4
+
+Write a test for your infrastructure. // TODO
 
 ---
 
