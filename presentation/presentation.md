@@ -190,6 +190,7 @@ awskms:///arn:aws:kms:us-east-1:111122223333:key/1234abcd-12ab-34bc-56ef-1234567
 - check installation with `pulumi version`
 - Local Setup (you can also use Pulumi Cloud or AWS KMS)
 - `pulumi login file://~/path/to/pulumi/state`
+- using AWS S3: `pulumi login s3://<bucket-name>`
 - creates a `.pulumi` folder which should _not_ be checked into git
 
 ---
@@ -373,7 +374,3 @@ https://www.pulumi.com/ai
 - Using Pulumi Cloud costs for business (https://www.pulumi.com/pricing/ $1.10 per resource per month on Enterprise)
 - Unit and Policy testing seem very close
 - Much smaller community than for other IaaC tools
-
-```
-
-```
