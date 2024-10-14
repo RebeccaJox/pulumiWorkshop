@@ -188,7 +188,7 @@ awskms:///arn:aws:kms:us-east-1:111122223333:key/1234abcd-12ab-34bc-56ef-1234567
 
 - install pulumi from this page https://www.pulumi.com/docs/install/
 - check installation with `pulumi version`
-- Local Setup (you can also use Pulumi Cloud)
+- Local Setup (you can also use Pulumi Cloud or AWS KMS)
 - `pulumi login file://~/path/to/pulumi/state`
 - creates a `.pulumi` folder which should _not_ be checked into git
 
@@ -224,41 +224,64 @@ pulumi stack output bucketName
 
 ---
 
-## Task1
+## Task 1: Basic setup
 
 - Deploy the `index.html` as a static website to AWS. Use an S3 Bucket here.
   (Tipp: just go through the Pulumi _Get Started Guide_ if you have no idea how to start https://bucketa-57c106b.s3.eu-central-1.amazonaws.com/bucketA-index.html)
 
 ---
 
-## Task2
+## Task 2: Programming features
 
 - Deploy the same `index.html` to 3 different buckets in a loop using your chosen programming languages abilities
 
 ---
 
-## Task3
+## Task 3: Secrets and Stacks
 
-Copy the content of `tasks/task3.ts` to `pulumiWorkshop/index.ts`
+Setting parameters and secrets for a stack. Based on this [repo](https://github.com/pulumi/tutorial-pulumi-fundamentals).
 
-Unit testing:
+Copy the content of `pulumiWorkshop/tasks/task3.ts` into your `index.ts` file. Try using `pulumi up`.
+Initialize a `dev` stack if not already existing:
 
-1. Take a look at the `index.test.ts` file
-2. Run `npm run test` from the project root
-3. Fix the errors
+```bash
+pulumi stack init dev
+pulumi stack select dev
+```
 
-Testing: Property and Policy Testing:
+---
 
-1. Create a new folder in your project root called `policy`
-2. `cd policy`
-3. `pulumi policy new aws-typescript`
-4. Copy the content of `tasks/task3-policies.ts` into `pulumiWorkshop/policy/index.ts`
-5. In the root of your project run `pulumi preview --policy-pack ./policy`
-6. Review the issues and improve.
+### Configure your stack
 
-After fixing the tests: run `pulumi up` again and have a look on the outputs. What do you see?
+```bash
+pulumi config set frontendPort 3001
+pulumi config set backendPort 3000
+pulumi config set mongoPort 27017
+pulumi config set mongoHost mongo
+pulumi config set database cart
+pulumi config set nodeEnvironment development
+pulumi config set protocol http://
+pulumi config set mongoUsername admin
+pulumi config set --secret mongoPassword S3cr37
 
-## Destroy your stack
+pulumi config
+```
+
+---
+
+Verify that everything is working as expected:
+
+```bash
+pulumi up
+```
+
+Have a look at your current state (depending where you keep it):
+
+```bash
+cat ~/.pulumi/stacks/quickstart/dev.json
+```
+
+Afterwards destroy your dev stack. (This is only necessary since we are on the same platform for the next step)
 
 ```bash
 pulumi destroy
@@ -266,21 +289,55 @@ pulumi destroy
 
 ---
 
-## Task4
+Create a `staging` stack with the same values.
 
-Setting parameters and secrets for a stack.
-
-```
-pulumi config set --stack <yourStackName> dbUsername admin
-pulumi config set --stack <yourStackName> --secret dbPassword S3cr37
-pulumi config --stack <yourStackName>
+```bash
+pulumi stack init staging --copy-config-from dev
 ```
 
-Output:
+Compare the generated secretValues for mongoPassword for both stacks. They should be different.
 
+Select the staging stack:
+
+```bash
+pulumi stack select staging
+
+pulumi config set frontendPort 3002
+pulumi up
 ```
-dbUsername       admin
-dbPassword   [secret]
+
+---
+
+## Task 4: Testing
+
+Copy the content of `tasks/task4.ts` to `pulumiWorkshop/index.ts`
+
+3.1 Unit testing:
+
+1. Take a look at the `index.test.ts` file
+2. Run `npm run test` from the project root
+3. Fix the errors
+
+---
+
+## Task 4: Testing
+
+3.2 Testing: Property and Policy Testing:
+
+1. Create a new folder in your project root called `policy`
+2. `cd policy` and run `pulumi policy new aws-typescript`
+3. Copy the content of `tasks/task4-policies.ts` into `pulumiWorkshop/policy/index.ts`
+4. In the root of your project run `pulumi preview --policy-pack ./policy`
+5. Review the issues and improve.
+
+After fixing the tests: run `pulumi up` again and have a look on the outputs. What do you see?
+
+---
+
+## Destroy your stack
+
+```bash
+pulumi destroy
 ```
 
 ---
@@ -294,19 +351,29 @@ https://www.pulumi.com/ai
 ## Why not just use Terraform?
 
 - Terraform is not strict OpenSource anymore
-- I don't like YAML!
+- You don't like YAML
 
 ---
 
 ## Pulumi Advantages (opinionated)
 
 - Integrated into your setup (linter, formatting, testing etc.)
+- Good support on code completion
+- You can structure your infrastructure like other code (classes, functions ...)
 - Infrastructure code can be tested like any other code
+- You have more freedom in writing Code ...
 
 ---
 
 ## Pulumi Drawbacks (opinionated)
 
-- You have more freedom in writing Code (and more opportunities to write crap)
-- Usage of Pulumi Cloud is default, self managing can cause issues with drifting states
-- Unit and Policy testing seem very close and exporting the resources automatically makes them outputs
+- You have more freedom in writing Code... and more opportunities to write crap
+- Steep learning curve (... at least for noobs like me)
+- Usage of Pulumi Cloud is default. Self managing can cause issues with drifting states
+- Using Pulumi Cloud costs for business (https://www.pulumi.com/pricing/ $1.10 per resource per month on Enterprise)
+- Unit and Policy testing seem very close
+- Much smaller community than for other IaaC tools
+
+```
+
+```

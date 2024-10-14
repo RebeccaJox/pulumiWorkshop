@@ -5,12 +5,40 @@ config:
   pulumi:tags:
     value:
       pulumi:template: aws-typescript
-  aws:region: eu-central-1
-  dbPassword:
-    type: string
-    description: database password
-    default: "none"
-  dbUsername:
-    type: string
-    description: database username
-    default: "none"
+  # aws:region: eu-central-1
+  # frontendPort:
+  #   type: integer
+  #   description: frontend port
+  #   default: 3001
+  # backendPort:
+  #   type: integer
+  #   description: backend port
+  #   default: 3000
+  # mongoPort:
+  #   type: integer
+  #   description: database port
+  #   default: 27017
+  # mongoHost:
+  #   type: string
+  #   description: database url
+  #   default: "mongodb://mongo:27017"
+  # mongoUsername:
+  #   type: string
+  #   description: mongodb user name
+  #   default: "user"
+  # database:
+  #   type: string
+  #   description: database name
+  #   default: "cart"
+  # protocol:
+  #   type: string
+  #   description: protocol to use (http)
+  #   default: "http://"
+  # nodeEnvironment:
+  #   type: string
+  #   description: node env
+  #   default: "development"
+  # mongoPassword:
+  #   type: string
+  #   description: database username
+  #   default: "none"

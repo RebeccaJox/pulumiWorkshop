@@ -1,114 +1,116 @@
-import * as aws from "@pulumi/aws";
+// This example runs locally in docker and is only to demonstrate usage of secretes and parameters
+
 import * as docker from "@pulumi/docker";
 import * as pulumi from "@pulumi/pulumi";
 
-const repository = new aws.ecr.Repository("pulumi-repository", {
-  // name: "my-first-pulumi-lambda",
-  forceDelete: true,
+// Get configuration values
+const config = new pulumi.Config();
+const frontendPort = config.requireNumber("frontendPort");
+const backendPort = config.requireNumber("backendPort");
+const mongoPort = config.requireNumber("mongoPort");
+const mongoHost = config.require("mongoHost");
+const database = config.require("database");
+const nodeEnvironment = config.require("nodeEnvironment");
+const protocol = config.require("protocol");
+const mongoUsername = config.require("mongoUsername");
+const mongoPassword = config.requireSecret("mongoPassword");
+
+const stack = pulumi.getStack();
+
+// Pull the backend image
+const backendImageName = "backend";
+const backend = new docker.RemoteImage(`${backendImageName}Image`, {
+  name: "pulumi/tutorial-pulumi-fundamentals-backend:latest",
 });
 
-const registryInfo = repository.registryId.apply(async (id) => {
-  const credentials = await aws.ecr.getCredentials({ registryId: id });
-  const decodedCredentials = Buffer.from(
-    credentials.authorizationToken,
-    "base64"
-  ).toString();
-
-  const [username, password] = decodedCredentials.split(":");
-  if (!password || !username) {
-    throw new Error("Invalid credentials");
-  }
-  return {
-    server: credentials.proxyEndpoint,
-    username: username,
-    password: password,
-  };
+// Pull the frontend image
+const frontendImageName = "frontend";
+const frontend = new docker.RemoteImage(`${frontendImageName}Image`, {
+  name: "pulumi/tutorial-pulumi-fundamentals-frontend:latest",
 });
 
-export const image = new docker.Image("pulumi-image", {
-  build: {
-    context: "app",
-    platform: "linux/xyz",
-  },
-  imageName: repository.repositoryUrl,
-  registry: registryInfo,
+// Pull the MongoDB image
+const mongoImage = new docker.RemoteImage("mongoImage", {
+  name: "pulumi/tutorial-pulumi-fundamentals-database:latest",
 });
 
-export const repoDigest = image.repoDigest;
-
-const lambda = new aws.lambda.Function("my-lambda", {
-  imageUri: image.repoDigest,
-  packageType: "Image",
-  role: new aws.iam.Role("pulumi-lambda-role", {
-    assumeRolePolicy: JSON.stringify({
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Action: "sts:AssumeRole",
-          Effect: "Allow",
-          Principal: {
-            Service: "lambda.amazonaws.com",
-          },
-        },
-      ],
-    }),
-  }).arn,
-  timeout: 300,
-  memorySize: 128,
-  architectures: ["x86_64"],
+// Create a Docker network
+const network = new docker.Network("network", {
+  name: `services-${stack}`,
 });
 
-export const lambdaPermission = new aws.lambda.Permission(
-  "pulumi-lambda-permission",
-  {
-    action: "lambda:CallFunction",
-    statementId: "AllowAPIGatewayInvoke",
-    function: lambda,
-    principal: "apigateway.amazonaws.com",
-  }
-);
-
-const apiGatewayRestApi = new aws.apigateway.RestApi("pulumi-api", {
-  name: "my-first-pulumi-api",
-});
-
-const apiGatewayResource = new aws.apigateway.Resource("pulumi-api-resource", {
-  parentId: apiGatewayRestApi.rootResourceId,
-  pathPart: "dad-joke",
-  restApi: apiGatewayRestApi.id,
-});
-
-const apiGatewayMethod = new aws.apigateway.Method("pulumi-api-method", {
-  restApi: apiGatewayRestApi.id,
-  resourceId: apiGatewayResource.id,
-  httpMethod: "GET",
-  authorization: "NONE",
-});
-
-const apiGatewayIntegration = new aws.apigateway.Integration(
-  "pulumi-api-integration",
-  {
-    restApi: apiGatewayRestApi.id,
-    resourceId: apiGatewayResource.id,
-    httpMethod: apiGatewayMethod.httpMethod,
-    integrationHttpMethod: "POST",
-    type: "AWS_PROXY",
-    uri: lambda.invokeArn,
-  }
-);
-
-const apiGatewayDeployment = new aws.apigateway.Deployment(
-  "pulumi-api-deployment",
-  {
-    restApi: apiGatewayRestApi.id,
-    stageName: "v1",
-    triggers: {
-      repoDigest: image.repoDigest,
+// Create the MongoDB container
+const mongoContainer = new docker.Container("mongoContainer", {
+  image: mongoImage.repoDigest,
+  name: `mongo-${stack}`,
+  rm: true,
+  ports: [
+    {
+      internal: mongoPort,
+      external: mongoPort,
     },
-  },
+  ],
+  networksAdvanced: [
+    {
+      name: network.name,
+      aliases: ["mongo"],
+    },
+  ],
+  envs: [
+    `MONGO_INITDB_ROOT_USERNAME=${mongoUsername}`,
+    pulumi.interpolate`MONGO_INITDB_ROOT_PASSWORD=${mongoPassword}`,
+  ],
+});
+
+// Create the backend container
+const backendContainer = new docker.Container(
+  "backendContainer",
   {
-    dependsOn: [apiGatewayIntegration],
-  }
+    name: `backend-${stack}`,
+    image: backend.repoDigest,
+    rm: true,
+    ports: [
+      {
+        internal: backendPort,
+        external: backendPort,
+      },
+    ],
+    envs: [
+      pulumi.interpolate`DATABASE_HOST=mongodb://${mongoUsername}:${mongoPassword}@${mongoHost}:${mongoPort}`,
+      `DATABASE_NAME=${database}?authSource=admin`,
+      `NODE_ENV=${nodeEnvironment}`,
+    ],
+    networksAdvanced: [
+      {
+        name: network.name,
+      },
+    ],
+  },
+  { dependsOn: [mongoContainer] }
 );
 
-export const url = pulumi.interpolate`${apiGatewayDeployment.invokeUrl}/${apiGatewayResource.pathPart}`;
+// Create the frontend container
+const frontendContainer = new docker.Container("frontendContainer", {
+  image: frontend.repoDigest,
+  name: `frontend-${stack}`,
+  rm: true,
+  ports: [
+    {
+      internal: frontendPort,
+      external: frontendPort,
+    },
+  ],
+  envs: [
+    `PORT=${frontendPort}`,
+    `HTTP_PROXY=backend-${stack}:${backendPort}`,
+    `PROXY_PROTOCOL=${protocol}`,
+  ],
+  networksAdvanced: [
+    {
+      name: network.name,
+    },
+  ],
+});
+
+export const url = pulumi.interpolate`http://localhost:${frontendPort}`;
+export { mongoPassword };
