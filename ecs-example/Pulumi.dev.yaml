@@ -1,0 +1,6 @@
+encryptionsalt: v1:pLXdpU1/MLY=:v1:oKAsXNQ+QsSjKmMN:IQZwxOPVgSjRSdFeuBnKC1H8JvdwXg==
+config:
+  aws:region: eu-central-1
+  ecs-example:containerPort: "80"
+  ecs-example:cpu: "512"
+  ecs-example:memory: "128"
